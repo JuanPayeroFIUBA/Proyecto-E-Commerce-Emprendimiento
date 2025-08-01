@@ -16,6 +16,7 @@
         <a href="#productos">Productos</a>
         <a href="#contacto">Contacto</a>
         <a href="#carrito">🛒 (<span id="cart-count">0</span>)</a>
+        <a href="admin.html">Admin Login</a>
     </nav>
     </header>
     <section id="inicio">
@@ -23,28 +24,29 @@
     <p>Arte en cerámica hecho a mano. Platos, bowls y mucho más.</p>
     </section>
 
-    <section id="productos">
+<section id="productos">
     <h2>Productos</h2>
-    <div class="producto-grid">
-        <div class="producto">
+    <div class="producto-grid" id="productos-estaticos">
+    <div class="producto">
         <img src="https://via.placeholder.com/150" alt="Plato">
         <h3>Plato de cerámica</h3>
         <p>$1500</p>
         <button onclick="agregarAlCarrito('Plato de cerámica')">Agregar al carrito</button>
-        </div>
-        <div class="producto">
+    </div>
+    <div class="producto">
         <img src="https://via.placeholder.com/150" alt="Taza">
         <h3>Taza artesanal</h3>
         <p>$1200</p>
         <button onclick="agregarAlCarrito('Taza artesanal')">Agregar al carrito</button>
-        </div>
-        <div class="producto">
+    </div>
+    <div class="producto">
         <img src="https://via.placeholder.com/150" alt="Bowl">
         <h3>Bowl decorativo</h3>
         <p>$1800</p>
         <button onclick="agregarAlCarrito('Bowl decorativo')">Agregar al carrito</button>
-        </div>
     </div>
+    </div>
+    <div class="producto-grid" id="productos-dinamicos"></div>
     </section>
 
     <section id="carrito">

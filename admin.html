@@ -1,0 +1,31 @@
+    <!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Ceramica_Baum</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="login-form">
+    <h2>Login Administrador</h2>
+    <input type="text" id="usuario" placeholder="Usuario">
+    <input type="password" id="contrasena" placeholder="Contraseña">
+    <button onclick="login()">Ingresar</button>
+    <p id="login-error" style="color:red;"></p>
+    </div>
+
+    <div id="admin-panel" style="display:none;">
+    <h2>Panel de Administración</h2>
+    <form id="form-producto">
+        <input type="text" id="nombre" placeholder="Nombre del producto" required>
+        <input type="text" id="precio" placeholder="Precio" required>
+        <input type="text" id="imagen" placeholder="URL de imagen" required>
+        <button type="submit">Agregar producto</button>
+    </form>
+    <h3>Vista previa de productos</h3>
+    <div class="producto-grid" id="vista-previa"></div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>

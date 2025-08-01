@@ -27,3 +27,20 @@ function actualizarCarrito() {
 
     contador.textContent = carrito.length;
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+    const productosDinamicos = document.getElementById("productos-dinamicos");
+    const productosGuardados = JSON.parse(localStorage.getItem("productos")) || [];
+
+    productosGuardados.forEach(producto => {
+    const div = document.createElement("div");
+    div.className = "producto";
+    div.innerHTML = `
+        <img src="${producto.imagen}" alt="${producto.nombre}">
+        <h3>${producto.nombre}</h3>
+        <p>$${producto.precio}</p>
+        <button onclick="agregarAlCarrito('${producto.nombre}')">Agregar al carrito</button>
+    `;
+    productosDinamicos.appendChild(div);
+    });
+});
