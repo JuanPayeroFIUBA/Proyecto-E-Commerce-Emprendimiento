@@ -1,0 +1,2 @@
+Set-ExecutionPolicy Restricted
+escribir eso en el powershell despues de usar el venv si queremos
