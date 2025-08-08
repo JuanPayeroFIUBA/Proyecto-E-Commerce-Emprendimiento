@@ -1,9 +1,14 @@
 from flask import Flask, request, jsonify
 import sqlite3
 from flask_cors import CORS
+import mercadopago
 
 app = Flask(__name__)
 CORS(app)
+
+sdk = mercadopago.SDK(
+    "TEST-3203011341687694-080615-c85782acdf7dbb3fa1ef300022fed20c-1111842971"
+)
 
 
 def init_db():
@@ -68,6 +73,60 @@ def delete_producto(id):
     conn.commit()
     conn.close()
     return jsonify({"mensaje": "Producto eliminado"}), 200
+
+
+@app.route("/api/crear-preferencia", methods=["POST"])
+def crear_preferencia():
+    ngrok_url = "https://4b17d96633da.ngrok-free.app"
+
+    datos = request.json
+
+    items = []
+    for producto in datos["productos"]:
+        items.append(
+            {
+                "title": producto["nombre"],
+                "quantity": 1,
+                "unit_price": float(producto["precio"]),
+                "currency_id": "ARS",
+            }
+        )
+    # for producto in datos["productos"]:
+    #    print("DEBUG producto recibido:", producto)
+    #    items.append(
+    #        {
+    #            "title": producto["title"],
+    #            "quantity": int(producto["quantity"]),
+    #            "unit_price": float(producto["unit_price"]),
+    #            "currency_id": "ARS",
+    #        }
+    #    )
+
+    preferencia_data = {
+        "items": [
+            {
+                "title": producto["nombre"],
+                "quantity": 1,
+                "unit_price": float(producto["precio"]),
+                "currency_id": "ARS",
+            }
+        ],
+        "back_urls": {
+            "success": f"{ngrok_url}/compra-exitosa.html",
+            "failure": f"{ngrok_url}/compra-fallida.html",
+            "pending": f"{ngrok_url}/compra-pendiente.html",
+        },
+        "auto_return": "approved",
+    }
+
+    try:
+        print("Datos enviados a Mercado Pago:", preferencia_data)
+        preferencia = sdk.preference().create(preferencia_data)
+        print("Respuesta de Mercado Pago:", preferencia)
+        return jsonify({"id": preferencia["response"]["id"]})
+    except Exception as e:
+        print("Error al crear preferencia:", e)
+        return jsonify({"error": "No se pudo crear la preferencia"}), 500
 
 
 if __name__ == "__main__":
