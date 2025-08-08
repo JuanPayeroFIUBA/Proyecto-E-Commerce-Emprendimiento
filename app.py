@@ -6,9 +6,7 @@ import mercadopago
 app = Flask(__name__)
 CORS(app)
 
-sdk = mercadopago.SDK(
-    "TEST-3203011341687694-080615-c85782acdf7dbb3fa1ef300022fed20c-1111842971"
-)
+sdk = mercadopago.SDK("TEST-")
 
 
 def init_db():
