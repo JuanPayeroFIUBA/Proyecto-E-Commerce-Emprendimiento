@@ -1,74 +1,165 @@
-let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+let cart = JSON.parse(localStorage.getItem("carrito")) || [];
+const API_URL = "http://127.0.0.1:5000/api";
 
-function agregarAlCarrito(producto) {
-    carrito.push(producto);
-    localStorage.setItem("carrito", JSON.stringify(carrito));
-    actualizarCarrito();
+function saveCart() {
+    localStorage.setItem("carrito", JSON.stringify(cart));
+    updateCartCount();
 }
 
-function eliminarDelCarrito(index) {
-    carrito.splice(index, 1);
-    localStorage.setItem("carrito", JSON.stringify(carrito));
-    actualizarCarrito();
+function updateCartCount() {
+    const count = cart.reduce((sum, item) => sum + item.cantidad, 0);
+    document.getElementById("cantidad-carrito").textContent = count;
 }
 
-function realizarCompra() {
-    if (carrito.length === 0) {
+async function loadProducts() {
+    try {
+        const res = await fetch(`${API_URL}/productos`);
+        const products = await res.json();
+        renderProducts(products);
+    } catch (error) {
+        console.error("Error cargando productos:", error);
+    }
+}
+
+function renderProducts(products) {
+    const productList = document.getElementById('product-list');
+    productList.innerHTML = "";
+
+    products.forEach(product => {
+        const card = document.createElement('div');
+        card.classList.add('product-card');
+
+        card.innerHTML = `
+            <img src="${product.imagen}" alt="${product.nombre}">
+            <h3>${product.nombre}</h3>
+            <p class="price">$${product.precio.toLocaleString()}</p>
+            <button class="add-to-cart">Agregar al carrito</button>
+        `;
+
+        card.querySelector('.add-to-cart').addEventListener('click', () => {
+            addToCart(product);
+        });
+
+        productList.appendChild(card);
+    });
+}
+
+function addToCart(product) {
+    const existing = cart.find(item => item.id === product.id);
+    if (existing) {
+        existing.cantidad += 1;
+    } else {
+        cart.push({ ...product, cantidad: 1 });
+    }
+    saveCart();
+    renderCart();
+}
+
+function decreaseFromCart(id) {
+    const item = cart.find(p => p.id === id);
+    if (!item) return;
+    if (item.cantidad > 1) {
+        item.cantidad -= 1;
+    } else {
+        cart = cart.filter(p => p.id !== id);
+    }
+    saveCart();
+    renderCart();
+}
+
+function removeFromCart(id) {
+    cart = cart.filter(p => p.id !== id);
+    saveCart();
+    renderCart();
+}
+
+document.getElementById('clear-cart').addEventListener('click', () => {
+    if (confirm("¿Vaciar carrito?")) {
+        cart = [];
+        saveCart();
+        renderCart();
+    }
+});
+
+function renderCart() {
+    const cartItems = document.getElementById('cart-items');
+    const cartTotal = document.getElementById('cart-total');
+
+    cartItems.innerHTML = "";
+    let total = 0;
+
+    cart.forEach(item => {
+        total += item.precio * item.cantidad;
+        const li = document.createElement('li');
+
+        li.innerHTML = `
+            ${item.nombre} - $${item.precio.toLocaleString()} x ${item.cantidad}
+            <div>
+                <button onclick="decreaseFromCart(${item.id})">-</button>
+                <button onclick="addToCart(${JSON.stringify(item)})">+</button>
+                <button onclick="removeFromCart(${item.id})">Eliminar</button>
+            </div>
+        `;
+
+        cartItems.appendChild(li);
+    });
+
+    cartTotal.textContent = `$${total.toLocaleString()}`;
+    updateCartCount();
+}
+
+document.getElementById('checkout-btn').addEventListener('click', async () => {
+    if (cart.length === 0) {
         alert("El carrito está vacío.");
         return;
     }
 
-    fetch("http://127.0.0.1:5000/api/crear-preferencia", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productos: carrito })
-    })
-    .then(res => res.json())
-    .then(data => {
-        window.location.href = `https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=${data.id}`;
-    });
-}
+    try {
+        const res = await fetch(`${API_URL}/crear-preferencia`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ productos: cart })
+        });
 
-function actualizarCarrito() {
-    const contenido = document.getElementById("contenido-carrito");
-    const totalSpan = document.getElementById("total-carrito");
-    const cantidadSpan = document.getElementById("cantidad-carrito");
+        const data = await res.json();
 
-    contenido.innerHTML = "";
-    let total = 0;
-
-    carrito.forEach((producto, index) => {
-        const div = document.createElement("div");
-        div.innerHTML = `
-            ${producto.nombre} - $${producto.precio}
-            <button onclick="eliminarDelCarrito(${index})">Eliminar</button>
-        `;
-        contenido.appendChild(div);
-        total += producto.precio;
-    });
-
-    totalSpan.textContent = total.toFixed(2);
-    cantidadSpan.textContent = carrito.length;
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-    actualizarCarrito();
-
-    fetch("http://127.0.0.1:5000/api/productos")
-        .then(res => res.json())
-        .then(data => {
-            const contenedor = document.getElementById("productos");
-            contenedor.innerHTML = "";
-
-            data.forEach(producto => {
-                const div = document.createElement("div");
-                div.innerHTML = `
-                    <img src="${producto.imagen}" alt="${producto.nombre}" style="width: 100px;">
-                    <h3>${producto.nombre}</h3>
-                    <p>$${producto.precio}</p>
-                    <button onclick='agregarAlCarrito(${JSON.stringify(producto)})'>Agregar al carrito</button>
-                `;
-                contenedor.appendChild(div);
-            });
-    });
+        if (data.id) {
+            window.location.href = `https://sandbox.mercadopago.com.ar/checkout/v1/redirect?pref_id=${data.id}`;
+        } else {
+            alert("Error al crear preferencia");
+        }
+    } catch (error) {
+        console.error("Error en el checkout:", error);
+    }
 });
+
+document.querySelector("#contacto form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const nombre = e.target.querySelector('input[type="text"]').value;
+    const email = e.target.querySelector('input[type="email"]').value;
+    const mensaje = e.target.querySelector('textarea').value;
+
+    try {
+        const res = await fetch(`${API_URL}/contacto`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ nombre, email, mensaje })
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+            alert("✅ Mensaje enviado correctamente");
+            e.target.reset();
+        } else {
+            alert("❌ " + (data.error || "Error al enviar mensaje"));
+        }
+    } catch (error) {
+        console.error("Error enviando mensaje:", error);
+        alert("❌ Error en el servidor");
+    }
+});
+
+
+loadProducts();
+renderCart();

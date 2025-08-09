@@ -1,12 +1,24 @@
 from flask import Flask, request, jsonify
 import sqlite3
 from flask_cors import CORS
+from flask_mail import Mail, Message
 import mercadopago
 
 app = Flask(__name__)
 CORS(app)
 
-sdk = mercadopago.SDK("TEST-")
+sdk = mercadopago.SDK(
+    "TEST-3203011341687694-080615-c85782acdf7dbb3fa1ef300022fed20c-1111842971"
+)
+
+app.config["MAIL_SERVER"] = "smtp.gmail.com"
+app.config["MAIL_PORT"] = 587
+app.config["MAIL_USE_TLS"] = True
+app.config["MAIL_USERNAME"] = "payeronacho@gmail.com"
+app.config["MAIL_PASSWORD"] = "aymhscfpbpbefimr "
+app.config["MAIL_DEFAULT_SENDER"] = ("Ceramica_Baum", "payeronacho@gmail.com")
+
+mail = Mail(app)
 
 
 def init_db():
@@ -125,6 +137,30 @@ def crear_preferencia():
     except Exception as e:
         print("Error al crear preferencia:", e)
         return jsonify({"error": "No se pudo crear la preferencia"}), 500
+
+
+@app.route("/api/contacto", methods=["POST"])
+def contacto():
+    data = request.get_json()
+
+    nombre = data.get("nombre")
+    email = data.get("email")
+    mensaje = data.get("mensaje")
+
+    if not nombre or not email or not mensaje:
+        return jsonify({"error": "Faltan campos"}), 400
+
+    try:
+        msg = Message(
+            subject=f"Nuevo mensaje de {nombre}",
+            recipients=["payeronacho@gmail.com"],
+            body=f"De: {nombre} <{email}>\n\nMensaje:\n{mensaje}",
+        )
+        mail.send(msg)
+        return jsonify({"message": "Mensaje enviado con éxito"})
+    except Exception as e:
+        print(e)
+        return jsonify({"error": "Error al enviar el mensaje"}), 500
 
 
 if __name__ == "__main__":

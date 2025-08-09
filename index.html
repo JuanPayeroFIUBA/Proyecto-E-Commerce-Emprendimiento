@@ -5,13 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ceramica_Baum</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="static/styles.css">
 </head>
 
 <body>
     <header>
     <h1>Ceramica_Baum</h1>
-    <nav>
+    <nav class="navbar">
         <a href="#inicio">Inicio</a>
         <a href="#productos">Productos</a>
         <a href="#contacto">Contacto</a>
@@ -24,38 +25,19 @@
     <p>Arte en cerámica hecho a mano. Platos, bowls y mucho más.</p>
     </section>
 
-    <section id="productos">
-        <h2>Productos</h2>
-        <div class="producto-grid" id="productos-estaticos">
-        <!--<div class="producto">
-            <img src="https://via.placeholder.com/150" alt="Plato">
-            <h3>Plato de cerámica</h3>
-            <p>$1500</p>
-            <button onclick="agregarAlCarrito('Plato de cerámica')">Agregar al carrito</button>
-        </div>
-        <div class="producto">
-            <img src="https://via.placeholder.com/150" alt="Taza">
-            <h3>Taza artesanal</h3>
-            <p>$1200</p>
-            <button onclick="agregarAlCarrito('Taza artesanal')">Agregar al carrito</button>
-        </div>
-        <div class="producto">
-            <img src="https://via.placeholder.com/150" alt="Bowl">
-            <h3>Bowl decorativo</h3>
-            <p>$1800</p>
-            <button onclick="agregarAlCarrito('Bowl decorativo')">Agregar al carrito</button>
-        </div>
---> 
-        </div>
-        <div class="producto-grid" id="productos-dinamicos"></div>
-    </section>
-
-    <section id="carrito" style="padding: 1em; border: 1px solid #ccc; margin-top: 2em;">
-        <h2>Carrito de Compras 🛒 </h2>
-        <div id="contenido-carrito"></div>
-        <p><strong>Total:</strong> $<span id="total-carrito">0</span></p>
-        <button onclick="realizarCompra()">Comprar</button>
-    </section>
+    <div class="container">
+        <section class="product-grid" id="product-list"></section>
+    
+        <aside class="cart">
+            <h2>🛒 Carrito</h2>
+            <ul id="cart-items"></ul>
+            <p class="total">Total: <span id="cart-total">$0</span></p>
+            <button id="checkout-btn" class="checkout">Finalizar compra</button>
+            <div style="margin-top:.75rem;">
+                <button id="clear-cart" class="btn">Vaciar carrito</button>
+            </div>
+        </aside>
+    </div>
 
     <section id="contacto">
     <h2>Contacto</h2>
